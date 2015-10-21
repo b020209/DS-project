@@ -2,11 +2,13 @@
 #include <stdlib.h>
 #define maze_size 5
 #define FALSE 0
-#define EXIT_COL maze_size-2
-#define EXIT_ROW maze_size-2
+#define EXIT_COL1 maze_size-2
+#define EXIT_ROW1 maze_size-2
+#define EXIT_COL2 1
+#define EXIT_ROW2 1
 #define true 1
-int maze[2][maze_size][maze_size];// 0 for wall ,1 for road ,2 for stairs ,3 for path ,4 for restricted
-int top=0;
+int maze[2][maze_size][maze_size],mark1[2][maze_size][maze_size],mark2[2][maze_size][maze_size];// 0 for wall ,1 for road ,2 for stairs ,3 for path
+int top1=0,top2=0;
 typedef struct{
     int z;
     int x;
@@ -18,42 +20,63 @@ typedef struct{
     int vert;
     int horiz;
 }offsets;
-offsets move[5];
-place stack[10000];
-void path(void);
-place pop(void){
-    return stack[top--];
+typedef struct{
+    int z;
+    int x;
+    int y;
+}mouse;
+offsets move1[5],move2[5];
+place mouse1[10000],mouse2[10000];
+mouse A,B;
+int A_MEET_B(void){
+    if(A.x==B.x&&A.y==B.y&&A.z==B.z) return 1;
+    return 0;
 }
-void push(place item){
-    stack[++top]=item;
+void print_place(void){
+    printf("ratA(%d,%d,%d)\n",A.z,A.x,A.y);
+    printf("ratB(%d,%d,%d)\n",B.z,B.x,B.y);
 }
-int main(){
-    memset(maze,0,sizeof(maze));
+void input(void){
     char temp;
-    place mouse1,mouse2;
+    int a;
     for(int m=0;m<2;m++){
+        scanf("%d",&a);
         for(int i=0;i<maze_size;i++){
             for(int j=0;j<maze_size;j++){
                 while(1){
                     scanf("%c",&temp);
                     if(temp=='X') {
                         maze[m][i][j]=0;
+                        mark1[m][i][j]=0;
+                        mark2[m][i][j]=0;
                         break;
                     }
                     else if(temp=='.'){
                         maze[m][i][j]=1;
+                        mark1[m][i][j]=1;
+                        mark2[m][i][j]=1;
                         break;
                     }
                     else if(temp=='o'){
                         maze[m][i][j]=2;
+                        if(m==0){
+                            mark1[m][i][j]=2;
+                            mark2[m][i][j]=1;
+                        }
+                        else if(m==1){
+                            mark1[m][i][j]=1;
+                            mark2[m][i][j]=2;
+                        }
                         break;
                     }
                 }
             }
         }
     }
-    printf("\n");
+}
+void print(void){
     for(int m=0;m<2;m++){
+        printf("\n");
         for(int i=0;i<maze_size;i++){
             for(int j=0;j<maze_size;j++){
                 if(maze[m][i][j]==0) {
@@ -68,108 +91,42 @@ int main(){
             }
             printf("\n");
         }
-        printf("\n");
     }
-    //walk(1,1,0);
-    printf("\n");
-    for(int m=0;m<2;m++){
-        for(int i=0;i<maze_size;i++){
-            for(int j=0;j<maze_size;j++){
-                if(maze[m][i][j]==0) {
-                    printf("X");
-                }
-                else if(maze[m][i][j]==1) {
-                    printf(".");
-                }
-                else if(maze[m][i][j]==2) {
-                    printf("o");
-                }
-                else if(maze[m][i][j]==3) {
-                    printf("x");
-                }
-                else if(maze[m][i][j]==4) {
-                    printf("*");
-                }
-            }
-            printf("\n");
+}
+int A_arrive(void){
+    if(A.x==EXIT_ROW1&&A.y==EXIT_COL1&&A.z==1) return 1;
+    return 0;
+}
+int B_arrive(void){
+    if(B.x==EXIT_ROW2&&B.y==EXIT_COL2&&B.z==0) return 1;
+    return 0;
+}
+void path1(void){
+
+}
+int main(){
+    freopen("input.txt","r",stdin);
+    freopen("output.txt","w",stdout);
+    input();
+    print();
+    while(1){
+        //path1();
+        //path2();
+        if(A_arrive()){
+            printf("rats didn't encounter each other in this maze\n");
+            break;
         }
-        printf("\n");
+        else if(B_arrive()){
+            printf("ratA(%d,%d,%d)\n",A.z,A.x,A.y);
+            printf("rats didn't encounter each other in this maze\n");
+            break;
+        }
+        else if(A_MEET_B()){
+            printf("ratA(%d,%d,%d)\n",A.z,A.x,A.y);
+            printf("rats encounter each other in (%d,%d,%d)",B.z,B.x,B.y);
+            break;
+        }
+        print_place();
     }
     return 0;
 }
-void path(void){
-    int i,row,col,floor,next_floor,next_row,next_col,dir,found=FALSE;
-    place pos;
-    stack[0].x=1;
-    stack[0].y=1;
-    stack[0].dir=1;
-    while(top>-1&&!found){
-        pos=pop();
-        row=pos.x;
-        col=pos.y;
-        dir=pos.dir;
-        while(dir<8&&!found){
-            next_row=row+move[dir].vert;
-            next_col=col+move[dir].horiz;
-            if(next_row==EXIT_ROW&&next_col==EXIT_COL){
-                found=true;
-            }
-            else if(!maze[next_row][next_col]&&!mark[next_row][next_col]){
-                mark[next_row][next_col]=1;
-                pos.x=row;
-                pos.y=col;
-                pos.dir=++dir;
-                push(pos);
-                row=next_row;
-                col=next_col;
-                dir=0;
-            }
-            else dir++;
-        }
-    }
-    if(found){
-        printf("The path is:\n");
-        printf("row col\n");
-        for(i=0;i<top;i++){
-            printf("%2d%5d",stack[i].row,stack[i].col);
-        }
-        printf("%2d%5d\n",row,col);
-        printf("%2d%5d\n",EXIT_ROW,EXIT_COL);
-    }
-    else printf("The maze does not have a path\n");
-}
-/*void walk(int a,int b,int  c){
-    if(a==maze_size-2&&b==maze_size-2) return;
-    if(maze[a+1][b][c]==1){
-         maze[a+1][b][c]=3;
-         walk(a+1,b,c);
-    }
-    if(maze[a-1][b][c]=1){
-        maze[a-1][b][c]=3;
-        walk(a-1,b,c);
-    }
-    if(maze[a][b-1][c]==1){
-         maze[a][b-1][c]=3;
-         walk(a,b-1,c);
-    }
-    if(maze[a][b+1][c]==1){
-        maze[a][b+1][c]=3;
-        walk(a,b+1,c);
-    }
-    if(maze[a-1][b-1][c]==1){
-        maze[a-1][b+1][c]=3;
-        walk(a,b+1,c);
-    }
-    if(maze[a-1][b+1][c]==1){
-        maze[a-1][b+1][c]=3;
-        walk(a-1,b+1,c);
-    }
-    if(maze[a+1][b-1][c]==1){
-        maze[a+1][b-1][c]=3;
-        walk(a+1,b-1,c);
-    }
-    if(maze[a+1][b+1][c]==1){
-        maze[a+1][b+1][c]=3;
-        walk(a+1,b+1,c);
-    }
-}*/
