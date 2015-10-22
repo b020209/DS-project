@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
-#define maze_size 5
+#define maze_size 101
 #define FALSE 0
 #define EXIT_COL1 maze_size-2
 #define EXIT_ROW1 maze_size-2
@@ -16,7 +16,6 @@ typedef struct{
     int dir;
 }place;
 typedef struct{
-    int stairs;
     int vert;
     int horiz;
 }offsets;
@@ -25,7 +24,6 @@ typedef struct{
     int x;
     int y;
 }mouse;
-offsets move1[5],move2[5];
 place mouse1[10000],mouse2[10000];
 mouse A,B;
 int A_MEET_B(void){
@@ -47,26 +45,14 @@ void input(void){
                     scanf("%c",&temp);
                     if(temp=='X') {
                         maze[m][i][j]=0;
-                        mark1[m][i][j]=0;
-                        mark2[m][i][j]=0;
                         break;
                     }
                     else if(temp=='.'){
                         maze[m][i][j]=1;
-                        mark1[m][i][j]=1;
-                        mark2[m][i][j]=1;
                         break;
                     }
                     else if(temp=='o'){
                         maze[m][i][j]=2;
-                        if(m==0){
-                            mark1[m][i][j]=2;
-                            mark2[m][i][j]=1;
-                        }
-                        else if(m==1){
-                            mark1[m][i][j]=1;
-                            mark2[m][i][j]=2;
-                        }
                         break;
                     }
                 }
@@ -102,16 +88,87 @@ int B_arrive(void){
     return 0;
 }
 void path1(void){
-
+    place temp;
+    mouse1[top1].x=A.x;
+    mouse1[top1].y=A.y;
+    mouse1[top1].z=A.z;
+    mouse1[top1].dir=0;
+    if(!mark1[A.z][A.x][A.y]) mark1[A.z][A.x][A.y]=1;
+    if(mark1[A.z][A.x][A.y+1]==0&&(maze[A.z][A.x][A.y+1]==1||maze[A.z][A.x][A.y+1]==2)){
+        mouse1[top1++].dir=0;
+        A.y+=1;
+    }
+    else if(mark1[A.z][A.x+1][A.y]==0&&(maze[A.z][A.x+1][A.y]==1||maze[A.z][A.x+1][A.y]==2)){
+        mouse1[top1++].dir=1;
+        A.x+=1;
+    }
+    else if(mark1[A.z][A.x-1][A.y]==0&&(maze[A.z][A.x-1][A.y]==1||maze[A.z][A.x-1][A.y]==2)){
+        mouse1[top1++].dir=2;
+        A.x-=1;
+    }
+    else if(mark1[A.z][A.x][A.y-1]==0&&(maze[A.z][A.x][A.y-1]==1||maze[A.z][A.x][A.y-1]==2)){
+        mouse1[top1++].dir=3;
+        A.y-=1;
+    }
+    else{
+        top1--;
+        A.x=mouse1[top1].x;
+        A.y=mouse1[top1].y;
+        A.z=mouse1[top1].z;
+    }
+    if(maze[A.z][A.x][A.y]==2){
+        A.z=1;
+        mouse1[top1].dir=0;
+    }
+}
+void path2(void){
+    place temp;
+    mouse2[top2].x=B.x;
+    mouse2[top2].y=B.y;
+    mouse2[top2].z=B.z;
+    mouse2[top2].dir=0;
+    if(!mark2[B.z][B.x][B.y]) mark2[B.z][B.x][B.y]=1;
+    if(mark2[B.z][B.x][B.y+1]==0&&(maze[B.z][B.x][B.y+1]==1||maze[B.z][B.x][B.y+1]==2)){
+        mouse2[top2++].dir=0;
+        B.y+=1;
+    }
+    else if(mark2[B.z][B.x+1][B.y]==0&&(maze[B.z][B.x+1][B.y]==1||maze[B.z][B.x+1][B.y]==2)){
+        mouse2[top2++].dir=1;
+        B.x+=1;
+    }
+    else if(mark2[B.z][B.x-1][B.y]==0&&(maze[B.z][B.x-1][B.y]==1||maze[B.z][B.x-1][B.y]==2)){
+        mouse2[top2++].dir=2;
+        B.x-=1;
+    }
+    else if(mark2[B.z][B.x][B.y-1]==0&&(maze[B.z][B.x][B.y-1]==1||maze[B.z][B.x][B.y-1]==2)){
+        mouse2[top2++].dir=3;
+        B.y-=1;
+    }
+    else{
+        top2--;
+        B.x=mouse2[top2].x;
+        B.y=mouse2[top2].y;
+        B.z=mouse2[top2].z;
+    }
+    if(maze[B.z][B.x][B.y]==2){
+        B.z=1;
+        mouse2[top2].dir=0;
+    }
 }
 int main(){
-    freopen("input.txt","r",stdin);
+    freopen("1_maze.txt","r",stdin);
     freopen("output.txt","w",stdout);
     input();
     print();
+    A.z=0;
+    A.x=1;
+    A.y=1;
+    B.z=1;
+    B.x=maze_size-2;
+    B.y=maze_size-2;
     while(1){
-        //path1();
-        //path2();
+        path1();
+        path2();
         if(A_arrive()){
             printf("rats didn't encounter each other in this maze\n");
             break;
