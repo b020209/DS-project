@@ -62,7 +62,6 @@ void input(void){
 }
 void print(void){
     for(int m=0;m<2;m++){
-        printf("\n");
         for(int i=0;i<maze_size;i++){
             for(int j=0;j<maze_size;j++){
                 if(maze[m][i][j]==0) {
@@ -128,21 +127,21 @@ void path2(void){
     mouse2[top2].z=B.z;
     mouse2[top2].dir=0;
     if(!mark2[B.z][B.x][B.y]) mark2[B.z][B.x][B.y]=1;
-    if(mark2[B.z][B.x][B.y+1]==0&&(maze[B.z][B.x][B.y+1]==1||maze[B.z][B.x][B.y+1]==2)){
+    if(mark2[B.z][B.x][B.y-1]==0&&(maze[B.z][B.x][B.y-1]==1||maze[B.z][B.x][B.y-1]==2)){
         mouse2[top2++].dir=0;
-        B.y+=1;
-    }
-    else if(mark2[B.z][B.x+1][B.y]==0&&(maze[B.z][B.x+1][B.y]==1||maze[B.z][B.x+1][B.y]==2)){
-        mouse2[top2++].dir=1;
-        B.x+=1;
+        B.y-=1;
     }
     else if(mark2[B.z][B.x-1][B.y]==0&&(maze[B.z][B.x-1][B.y]==1||maze[B.z][B.x-1][B.y]==2)){
-        mouse2[top2++].dir=2;
+        mouse2[top2++].dir=1;
         B.x-=1;
     }
-    else if(mark2[B.z][B.x][B.y-1]==0&&(maze[B.z][B.x][B.y-1]==1||maze[B.z][B.x][B.y-1]==2)){
+    else if(mark2[B.z][B.x+1][B.y]==0&&(maze[B.z][B.x+1][B.y]==1||maze[B.z][B.x+1][B.y]==2)){
+        mouse2[top2++].dir=2;
+        B.x+=1;
+    }
+    else if(mark2[B.z][B.x][B.y+1]==0&&(maze[B.z][B.x][B.y+1]==1||maze[B.z][B.x][B.y+1]==2)){
         mouse2[top2++].dir=3;
-        B.y-=1;
+        B.y+=1;
     }
     else{
         top2--;
@@ -151,12 +150,12 @@ void path2(void){
         B.z=mouse2[top2].z;
     }
     if(maze[B.z][B.x][B.y]==2){
-        B.z=1;
+        B.z=0;
         mouse2[top2].dir=0;
     }
 }
 int main(){
-    freopen("1_maze.txt","r",stdin);
+    freopen("maze.txt","r",stdin);
     freopen("output.txt","w",stdout);
     input();
     print();
