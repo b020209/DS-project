@@ -32,6 +32,12 @@ int main() {
 				flag=1;
 				break;
 			}
+			else if(temp=='\n'){
+                continue;
+			}
+			else{
+                printf("Input error!!!\n");
+			}
 		}
 	}
 	return 0;
@@ -62,6 +68,12 @@ void binary_search_tree(void) {
 			else if(temp=='R'){
                 return;
 			}
+			else if(temp=='\n'){
+                continue;
+			}
+			else{
+                printf("Input error!!!\n");
+			}
 		}
 	}
 }
@@ -69,7 +81,7 @@ void insert(void) {
     int n;
     printf("Enter a number : ");
     scanf("%d",&n);
-    
+
 }
 void delete_node(void) {
 	int n;
