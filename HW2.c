@@ -9,12 +9,14 @@ typedef struct node{
 void insert(void);
 void delete_node(void);
 void search_node(void);
-void printInfixOrder(void);
-void printLevelOrder(void);
+void printInfixOrder(tree);
+void printLevelOrder(tree);
 void exit_a(void);
 void print(void);
 void binary_search_tree(void);
 void treasure_hunter(void);
+tree search_imply(tree ,int);
+tree root;
 int main() {
 	char temp,flag=0;
 	while(flag==0) {
@@ -90,18 +92,53 @@ void delete_node(void) {
 }
 void search_node(void) {
     int n;
+    tree ans;
     printf("Enter a number to search : ");
     scanf("%d",&n);
+    ans=search_imply(root,n);
+}
+tree search_imply(tree ptr,int n){
+    while(ptr){
+        if(n==ptr->data) return &(ptr->data);
+        if(n<ptr->data)
+            ptr=ptr->left;
+        else
+            ptr=ptr->right;
+    }
+    return NULL;
 }
 void print(void){
-	printInfixOrder();/* print the whole tree in infix order (from left to right)*/
-	printLevelOrder();/* print the whole tree in level order (from up to down)*/
+	printInfixOrder(root);/* print the whole tree in infix order (from left to right)*/
+	printf("\n");
+	printLevelOrder(root);/* print the whole tree in level order (from up to down)*/
 }
-void printInfixOrder(void){
-
+void printInfixOrder(tree ptr){
+    if(ptr){
+        printInfixOrder(ptr->left);
+        printf("%d ",ptr->data);
+        printInfixOrder(ptr->right);
+    }
 }
-void printLevelOrder(void){
-
+void printLevelOrder(tree ptr){
+    int front=0,rear=0;
+    tree qu[100000];
+    if(!ptr){
+        printf("There is no data in the tree.\n");
+        return;
+    }
+    qu[rear++]=ptr;
+    while(1){
+        ptr=qu[front--];
+        if(ptr){
+            printf("%d",ptr->data);
+            if(ptr->left)
+                qu[rear++]=ptr->left;
+            if(ptr->right)
+                qu[rear++]=ptr->right;
+        }
+        else break;
+    }
+    printf("\n");
 }
 void exit_a(void) {
     printf("Thank you for using.\nGoodbye!\n");
