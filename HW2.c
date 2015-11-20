@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#define MAX(x,y) ((x)>(y))?(x):(y)
 typedef struct node tree;
 typedef struct node {
 	int data;
@@ -54,29 +55,23 @@ void treasure_hunter(void) {
 	}
 	tree *root=NULL;
 	int temp;
-	while(1){
-        if(fscanf(fptr,"%d",&temp)==EOF){
-            fclose(fptr);
-            return;
-        }
-        else{
-            fscanf(fptr,"%d",&temp);
-            root=insert(root,temp);
-        }
+	while(fscanf(fptr,"%d\n",&temp)!=EOF) {
+		root=insert(root,temp);
 	}
+	fclose(fptr);
 	int key,treasure;
 	printf("Please input the key location : ");
 	scanf("%d",&key);
 	printf("Please input the treasure location : ");
 	scanf("%d",&treasure);
-    int stack[10000];
-    if(!search_node(root,key))
-        printf("Key is not found.\n");
-    if(!search_node(root,treasure))
-        printf("Treasure is not found.\n");
-    else{
-        travel(root,key,treasure);
-    }
+	int stack[10000];
+	if(!search_node(root,key))
+		printf("Key is not found.\n");
+	if(!search_node(root,treasure))
+		printf("Treasure is not found.\n");
+	else {
+		travel(root,key,treasure);
+	}
 }
 void binary_search_tree(void) {
 	char temp;
@@ -142,35 +137,32 @@ tree *insert(tree *ptr,int n) {
 	}
 }
 tree *delete_node(tree *ptr,int n) {
-    if(ptr==NULL) {
+	if(ptr==NULL) {
 		return NULL;
+	} else if(ptr->data>n)
+		ptr->left=delete_node(ptr->left,n);
+	else if(ptr->data<n)
+		ptr->right=delete_node(ptr->right,n);
+	else if(ptr->left==NULL) {
+		tree *temp=ptr->right;
+		ptr=NULL;
+		return temp;
+	} else if(ptr->left->right==NULL) {
+		tree *temp=ptr->left;
+		temp->right=ptr->right;
+		ptr=NULL;
+		return temp;
+	} else {
+		tree *temp,*tar;
+		for(temp=ptr->right; temp->left->left!=NULL; temp=temp->left);
+		tar=temp->left;
+		temp->left=tar->left;
+		tar->left=ptr->left;
+		tar->right=ptr->right;
+		ptr=NULL;
+		return tar;
 	}
-	else if(ptr->data>n)
-        ptr->left=delete_node(ptr->left,n);
-    else if(ptr->data<n)
-        ptr->right=delete_node(ptr->right,n);
-    else if(ptr->left==NULL){
-        tree *temp=ptr->right;
-        ptr=NULL;
-        return temp;
-    }
-    else if(ptr->left->right==NULL){
-        tree *temp=ptr->left;
-        temp->right=ptr->right;
-        ptr=NULL;
-        return temp;
-    }
-    else{
-        tree *temp,*tar;
-        for(temp=ptr->right;temp->left->left!=NULL;temp=temp->left);
-        tar=temp->left;
-        temp->left=tar->left;
-        tar->left=ptr->left;
-        tar->right=ptr->right;
-        ptr=NULL;
-        return tar;
-    }
-    return ptr;
+	return ptr;
 }
 tree *search_node(tree *ptr,int n) {
 	while(ptr) {
@@ -206,57 +198,106 @@ void printLevelOrder(tree *ptr) {
 				qu[rear++]=ptr->left;
 			if(ptr->right)
 				qu[rear++]=ptr->right;
-		}
-		else break;
+		} else break;
 	}
 	printf("\n");
 }
 void exit_a(void) {
 	printf("Thank you for using.\nGoodbye!\n");
 }
-void travel(tree *ptr,int key,int trea){
-    int top=0,top2=0;
-    tree *stack1[1000],*stack2[1000];
-    while(1) {
-		if(key==ptr->data){
-            printf("%d",ptr->data);
-            break;
+void travel(tree *ptr,int key,int trea) {
+	int top=0,top2=0;
+	tree *stack1[1000],*stack2[1000],*p1=ptr,*p2=ptr;
+	while(1) {
+		int temp=p1->data,b;
+		while(temp){
+		    if(temp%10==8){
+		        if(p1->left){
+		            b=p1->left->data;
+		            p1=delete_node(p1,p1->left->data);
+		            if(b==key){
+		                printf("Key is not found.\n");
+		                return;
+		            }
+		            if(b==trea){
+		                 printf("Treasure is not found.\n");
+		                 return;
+		            }
+		        }
+		        else if(p1->right){
+		            b=p1->right->data;
+		            p1=delete_node(p1,p1->right->data);
+		            if(b==key){
+		                printf("Key is not found.\n");
+		                return;
+		            }
+		            if(b==trea){
+		                 printf("Treasure is not found.\n");
+		                 return;
+		            }
+		        }
+		        else p1=delete_node(p1,p1->data);
+		    }
+		    temp=temp/10;
 		}
-		else if(key<ptr->data){
-            stack1[top++]=ptr;
-            printf("%d",ptr->data);
-            ptr=ptr->left;
+		if(key==p1->data) {
+			stack1[top++]=p1;
+			break;
+		} else if(key<p1->data) {
+			stack1[top++]=p1;
+			p1=p1->left;
+		} else if(key>p1->data) {
+			stack1[top++]=p1;
+			p1=p1->right;
 		}
-		else if(key>ptr->data){
-            stack1[top++]=ptr;
-            printf("%d",ptr->data);
-            ptr=ptr->right;
-		}
-		printf("->");
 	}
-    while(1) {
-		if(trea==ptr->data){
-            stack2[top2++]=ptr;
-            break;
+	while(1) {
+		int temp=p2->data,a;
+		while(temp) {
+			if(temp%10==8) {
+				if(p2->left) {
+					a=p2->left->data;
+					p2=delete_node(p2,p2->left->data);
+					if(a==trea) {
+						printf("Treasure is not found.\n");
+						return;
+					}
+				} else if(p2->right) {
+					a=p2->right->data;
+					p2=delete_node(p2,p2->right->data);
+					if(a==trea) {
+						printf("Treasure is not found.\n");
+						return;
+					}
+				} else p2=delete_node(p2,p2->data);
+			}
+			temp=temp/10;
 		}
-		else if(key<ptr->data){
-            stack2[top2++]=ptr;
-            ptr=ptr->left;
+		if(trea==p2->data) {
+			stack2[top2++]=p2;
+			break;
+		} else if(trea<p2->data) {
+			stack2[top2++]=p2;
+			p2=p2->left;
+		} else if(trea>p2->data) {
+			stack2[top2++]=p2;
+			p2=p2->right;
 		}
-		else if(key>ptr->data){
-            stack2[top2++]=ptr;
-            ptr=ptr->right;
-		}
-	}int flag=0;
-	for(int i=top;i>=0;i--){
-        if(stack1[i]==stack2[i]){
-            flag=i;
-            break;
-        }
-        else printf("%d->",stack1[i]->data);
 	}
-	for(int j=flag;j<top2-1;j++){
-	    printf("%d->",stack2[j]->data);
+	printf("Adventurer successfully found the treasure.\nShortest path to find the treasure:\n");
+	for(int i=0;i<top;i++){
+        printf("%d->",stack1[i]->data);
+	}
+	int flag=0;
+	for(int i=top-2; i>=0; i--) {
+		if(stack1[i]->data==stack2[i]->data) {
+			printf("%d->",stack1[i]->data);
+			flag=i;
+			break;
+		} else printf("%d->",stack1[i]->data);
+	}
+	for(int i=flag+1; i<top2-1; i++) {
+		printf("%d->",stack2[i]->data);
 	}
 	printf("%d\n",stack2[top2-1]->data);
 }
